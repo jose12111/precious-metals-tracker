@@ -154,10 +154,17 @@ const PreciousMetalsTracker = () => {
       return sum + calculateItemValue(coin.metalType, totalWeightInGrams, "ZAR");
     }, 0);
 
-    const zakahAmountZAR = totalCoinValueZAR * 0.025; // 2.5% of total coin value
-    const zakahAmountUSD = zakahAmountZAR * (currentPrices?.zarToUsdRate || 0); // Use fetched rate even in manual mode
+    const totalJewelleryValueZAR = jewellery.reduce((sum, item) => {
+      const totalWeightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
+      return sum + calculateItemValue(item.metalType, totalWeightInGrams, "ZAR");
+    }, 0);
 
-    alert(
+    const totalPreciousMetalValueZAR = totalCoinValueZAR + totalJewelleryValueZAR;
+
+    const zakahAmountZAR = totalPreciousMetalValueZAR * 0.025; // 2.5% of total precious metal value
+    const zakahAmountUSD = zakahAmountZAR * (currentPrices?.zarToUsdRate || 0);
+
+    showSuccess(
       `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}\nUSD: ${zakahAmountUSD.toFixed(2)}`
     );
   };
@@ -484,7 +491,7 @@ const PreciousMetalsTracker = () => {
           <CardTitle>Zakah Calculator</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="mb-4">Calculate your Zakah based on the total value of your coins.</p>
+          <p className="mb-4">Calculate your Zakah based on the total value of your precious metals (coins and jewellery).</p>
           <Button onClick={calculateZakah} className="w-full">Calculate Zakah (2.5%)</Button>
         </CardContent>
       </Card>
