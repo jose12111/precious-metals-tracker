@@ -251,7 +251,7 @@ const PreciousMetalsTracker = () => {
             <Input
               id="manualGoldPrice"
               type="number"
-              value={manualGoldPricePerGramZAR}
+              value={manualGoldPricePerGramZAR.toFixed(2)}
               onChange={(e) => setManualGoldPricePerGramZAR(parseFloat(e.target.value))}
               min="0"
               step="0.01"
@@ -263,7 +263,7 @@ const PreciousMetalsTracker = () => {
             <Input
               id="manualSilverPrice"
               type="number"
-              value={manualSilverPricePerGramZAR}
+              value={manualSilverPricePerGramZAR.toFixed(2)}
               onChange={(e) => setManualSilverPricePerGramZAR(parseFloat(e.target.value))}
               min="0"
               step="0.01"
