@@ -33,17 +33,17 @@ const PreciousMetalsTracker = () => {
   const [newCoinName, setNewCoinName] = useState("");
   const [newCoinMetalType, setNewCoinMetalType] = useState<MetalType>("Gold");
   const [newCoinQuantity, setNewCoinQuantity] = useState(1);
-  const [newCoinWeight, setNewCoinWeight] = useState(0);
-  const [newCoinWeightUnit, setNewCoinWeightUnit] = useState<WeightUnit>("Grams");
-  const [selectedCoinOunceOption, setSelectedCoinOunceOption] = useState<string>("custom"); // "0.1", "0.25", "0.5", "1", "custom"
+  const [newCoinWeight, setNewCoinWeight] = useState(1); // Default to 1 ounce
+  const [newCoinWeightUnit, setNewCoinWeightUnit] = useState<WeightUnit>("Ounces"); // Default to Ounces
+  const [selectedCoinOunceOption, setSelectedCoinOunceOption] = useState<string>("1"); // Default to 1 oz
 
   // Form states for adding jewellery
   const [newJewelleryName, setNewJewelleryName] = useState("");
   const [newJewelleryMetalType, setNewJewelleryMetalType] = useState<MetalType>("Gold");
-  const [newJewelleryWeight, setNewJewelleryWeight] = useState(0);
-  const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Grams");
+  const [newJewelleryWeight, setNewJewelleryWeight] = useState(1); // Default to 1 ounce
+  const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Ounces"); // Default to Ounces
   const [newJewelleryDescription, setNewJewelleryDescription] = useState("");
-  const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("custom"); // "0.1", "0.25", "0.5", "1", "custom"
+  const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("1"); // Default to 1 oz
 
   useEffect(() => {
     const loadPrices = async () => {
@@ -113,10 +113,10 @@ const PreciousMetalsTracker = () => {
     setCoins([...coins, newCoin]);
     setNewCoinName("");
     setNewCoinQuantity(1);
-    setNewCoinWeight(0);
+    setNewCoinWeight(1); // Reset to 1 ounce
     setNewCoinMetalType("Gold");
-    setNewCoinWeightUnit("Grams");
-    setSelectedCoinOunceOption("custom");
+    setNewCoinWeightUnit("Ounces"); // Reset to Ounces
+    setSelectedCoinOunceOption("1"); // Reset to 1 oz
     showSuccess("Coin added successfully!");
   };
 
@@ -135,11 +135,11 @@ const PreciousMetalsTracker = () => {
     };
     setJewellery([...jewellery, newItem]);
     setNewJewelleryName("");
-    setNewJewelleryWeight(0);
+    setNewJewelleryWeight(1); // Reset to 1 ounce
     setNewJewelleryDescription("");
     setNewJewelleryMetalType("Gold");
-    setNewJewelleryWeightUnit("Grams");
-    setSelectedJewelleryOunceOption("custom");
+    setNewJewelleryWeightUnit("Ounces"); // Reset to Ounces
+    setSelectedJewelleryOunceOption("1"); // Reset to 1 oz
     showSuccess("Jewellery added successfully!");
   };
 
