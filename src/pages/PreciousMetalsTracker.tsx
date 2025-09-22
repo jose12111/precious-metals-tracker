@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { v4 as uuidv4 } from 'uuid';
 import { showSuccess, showError } from "@/utils/toast";
+import { Switch } from "@/components/ui/switch"; // Import Switch component
 
 const PreciousMetalsTracker = () => {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -22,6 +23,11 @@ const PreciousMetalsTracker = () => {
     zarToUsdRate: number;
   } | null>(null);
   const [historicalPrices, setHistoricalPrices] = useState<HistoricalPriceData[]>([]);
+
+  // New states for manual price input
+  const [useManualPrices, setUseManualPrices] = useState(false);
+  const [manualGoldPricePerGramZAR, setManualGoldPricePerGramZAR] = useState(0);
+  const [manualSilverPricePerGramZAR, setManualSilverPricePerGramZAR] = useState(0);
 
   // Form states for adding coins
   const [newCoinName, setNewCoinName] = useState("");
@@ -44,6 +50,10 @@ const PreciousMetalsTracker = () => {
       try {
         const prices = await fetchCurrentMetalPrices();
         setCurrentPrices(prices);
+        // Pre-fill manual prices with fetched prices
+        setManualGoldPricePerGramZAR(prices.goldPerGramZAR);
+        setManualSilverPricePerGramZAR(prices.silverPerGramZAR);
+
         const historical = await fetchHistoricalMetalPrices();
         setHistoricalPrices(historical);
       } catch (error) {
@@ -58,30 +68,33 @@ const PreciousMetalsTracker = () => {
     return unit === "Ounces" ? weight * 28.35 : weight;
   };
 
+  // Helper to get the effective price per gram based on manual input toggle
+  const getEffectiveMetalPricePerGramZAR = (metalType: MetalType) => {
+    if (useManualPrices) {
+      return metalType === "Gold" ? manualGoldPricePerGramZAR : manualSilverPricePerGramZAR;
+    }
+    return metalType === "Gold" ? currentPrices?.goldPerGramZAR || 0 : currentPrices?.silverPerGramZAR || 0;
+  };
+
   const calculateItemValue = (
     metalType: MetalType,
     totalWeightInGrams: number,
-    prices: typeof currentPrices,
     currency: Currency
   ) => {
-    if (!prices) return 0;
+    if (!currentPrices && !useManualPrices) return 0; // If no prices and not manual mode, return 0
 
-    let valueZAR = 0;
-    if (metalType === "Gold") {
-      valueZAR = totalWeightInGrams * prices.goldPerGramZAR;
-    } else {
-      valueZAR = totalWeightInGrams * prices.silverPerGramZAR;
-    }
+    const pricePerGramZAR = getEffectiveMetalPricePerGramZAR(metalType);
+    const valueZAR = totalWeightInGrams * pricePerGramZAR;
 
-    return currency === "USD" ? valueZAR * prices.zarToUsdRate : valueZAR;
+    return currency === "USD" && currentPrices ? valueZAR * currentPrices.zarToUsdRate : valueZAR;
   };
 
   const totalPortfolioValue = coins.reduce((sum, coin) => {
     const totalWeightInGrams = convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit);
-    return sum + calculateItemValue(coin.metalType, totalWeightInGrams, currentPrices, currentCurrency);
+    return sum + calculateItemValue(coin.metalType, totalWeightInGrams, currentCurrency);
   }, 0) + jewellery.reduce((sum, item) => {
     const totalWeightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
-    return sum + calculateItemValue(item.metalType, totalWeightInGrams, currentPrices, currentCurrency);
+    return sum + calculateItemValue(item.metalType, totalWeightInGrams, currentCurrency);
   }, 0);
 
   const handleAddCoin = () => {
@@ -131,18 +144,18 @@ const PreciousMetalsTracker = () => {
   };
 
   const calculateZakah = () => {
-    if (!currentPrices) {
-      showError("Cannot calculate Zakah, metal prices not loaded.");
+    if (!currentPrices && !useManualPrices) {
+      showError("Cannot calculate Zakah, metal prices not loaded or manually entered.");
       return;
     }
 
     const totalCoinValueZAR = coins.reduce((sum, coin) => {
       const totalWeightInGrams = convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit);
-      return sum + calculateItemValue(coin.metalType, totalWeightInGrams, currentPrices, "ZAR");
+      return sum + calculateItemValue(coin.metalType, totalWeightInGrams, "ZAR");
     }, 0);
 
     const zakahAmountZAR = totalCoinValueZAR * 0.025; // 2.5% of total coin value
-    const zakahAmountUSD = zakahAmountZAR * currentPrices.zarToUsdRate;
+    const zakahAmountUSD = zakahAmountZAR * (currentPrices?.zarToUsdRate || 0); // Use fetched rate even in manual mode
 
     alert(
       `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}\nUSD: ${zakahAmountUSD.toFixed(2)}`
@@ -214,6 +227,49 @@ const PreciousMetalsTracker = () => {
             {currentCurrency === "ZAR" ? "R" : "$"}
             {totalPortfolioValue.toFixed(2)}
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Manual Price Input Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Manual Price Input
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="manual-prices-toggle">Enable Manual Input</Label>
+              <Switch
+                id="manual-prices-toggle"
+                checked={useManualPrices}
+                onCheckedChange={setUseManualPrices}
+              />
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="manualGoldPrice">Gold Price per Gram (ZAR)</Label>
+            <Input
+              id="manualGoldPrice"
+              type="number"
+              value={manualGoldPricePerGramZAR}
+              onChange={(e) => setManualGoldPricePerGramZAR(parseFloat(e.target.value))}
+              min="0"
+              step="0.01"
+              disabled={!useManualPrices}
+            />
+          </div>
+          <div>
+            <Label htmlFor="manualSilverPrice">Silver Price per Gram (ZAR)</Label>
+            <Input
+              id="manualSilverPrice"
+              type="number"
+              value={manualSilverPricePerGramZAR}
+              onChange={(e) => setManualSilverPricePerGramZAR(parseFloat(e.target.value))}
+              min="0"
+              step="0.01"
+              disabled={!useManualPrices}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -298,7 +354,7 @@ const PreciousMetalsTracker = () => {
                   <span>{coin.name} ({coin.metalType}) - {coin.quantity} x {coin.weight} {coin.weightUnit}</span>
                   <span>
                     {currentCurrency === "ZAR" ? "R" : "$"}
-                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit), currentPrices, currentCurrency).toFixed(2)}
+                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit), currentCurrency).toFixed(2)}
                   </span>
                 </li>
               ))}
@@ -388,7 +444,7 @@ const PreciousMetalsTracker = () => {
                   <span>{item.name} ({item.metalType}) - {item.weight} {item.weightUnit} {item.description && `(${item.description})`}</span>
                   <span>
                     {currentCurrency === "ZAR" ? "R" : "$"}
-                    {calculateItemValue(item.metalType, convertWeightToGrams(item.weight, item.weightUnit), currentPrices, currentCurrency).toFixed(2)}
+                    {calculateItemValue(item.metalType, convertWeightToGrams(item.weight, item.weightUnit), currentCurrency).toFixed(2)}
                   </span>
                 </li>
               ))}
