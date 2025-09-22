@@ -29,6 +29,7 @@ const PreciousMetalsTracker = () => {
   const [newCoinQuantity, setNewCoinQuantity] = useState(1);
   const [newCoinWeight, setNewCoinWeight] = useState(0);
   const [newCoinWeightUnit, setNewCoinWeightUnit] = useState<WeightUnit>("Grams");
+  const [selectedCoinOunceOption, setSelectedCoinOunceOption] = useState<string>("custom"); // "0.1", "0.25", "0.5", "1", "custom"
 
   // Form states for adding jewellery
   const [newJewelleryName, setNewJewelleryName] = useState("");
@@ -36,6 +37,7 @@ const PreciousMetalsTracker = () => {
   const [newJewelleryWeight, setNewJewelleryWeight] = useState(0);
   const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Grams");
   const [newJewelleryDescription, setNewJewelleryDescription] = useState("");
+  const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("custom"); // "0.1", "0.25", "0.5", "1", "custom"
 
   useEffect(() => {
     const loadPrices = async () => {
@@ -99,6 +101,9 @@ const PreciousMetalsTracker = () => {
     setNewCoinName("");
     setNewCoinQuantity(1);
     setNewCoinWeight(0);
+    setNewCoinMetalType("Gold");
+    setNewCoinWeightUnit("Grams");
+    setSelectedCoinOunceOption("custom");
     showSuccess("Coin added successfully!");
   };
 
@@ -119,6 +124,9 @@ const PreciousMetalsTracker = () => {
     setNewJewelleryName("");
     setNewJewelleryWeight(0);
     setNewJewelleryDescription("");
+    setNewJewelleryMetalType("Gold");
+    setNewJewelleryWeightUnit("Grams");
+    setSelectedJewelleryOunceOption("custom");
     showSuccess("Jewellery added successfully!");
   };
 
@@ -139,6 +147,46 @@ const PreciousMetalsTracker = () => {
     alert(
       `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}\nUSD: ${zakahAmountUSD.toFixed(2)}`
     );
+  };
+
+  const handleCoinWeightUnitChange = (value: WeightUnit) => {
+    setNewCoinWeightUnit(value);
+    if (value === "Ounces") {
+      setNewCoinWeight(1); // Default to 1 ounce
+      setSelectedCoinOunceOption("1");
+    } else {
+      setNewCoinWeight(0); // Default to 0 grams
+      setSelectedCoinOunceOption("custom");
+    }
+  };
+
+  const handleCoinOunceOptionChange = (value: string) => {
+    setSelectedCoinOunceOption(value);
+    if (value !== "custom") {
+      setNewCoinWeight(parseFloat(value));
+    } else {
+      setNewCoinWeight(0); // Reset weight when switching to custom
+    }
+  };
+
+  const handleJewelleryWeightUnitChange = (value: WeightUnit) => {
+    setNewJewelleryWeightUnit(value);
+    if (value === "Ounces") {
+      setNewJewelleryWeight(1); // Default to 1 ounce
+      setSelectedJewelleryOunceOption("1");
+    } else {
+      setNewJewelleryWeight(0); // Default to 0 grams
+      setSelectedJewelleryOunceOption("custom");
+    }
+  };
+
+  const handleJewelleryOunceOptionChange = (value: string) => {
+    setSelectedJewelleryOunceOption(value);
+    if (value !== "custom") {
+      setNewJewelleryWeight(parseFloat(value));
+    } else {
+      setNewJewelleryWeight(0); // Reset weight when switching to custom
+    }
   };
 
   return (
@@ -198,11 +246,29 @@ const PreciousMetalsTracker = () => {
           <div className="flex space-x-2">
             <div className="flex-grow">
               <Label htmlFor="coinWeight">Weight</Label>
-              <Input id="coinWeight" type="number" value={newCoinWeight} onChange={(e) => setNewCoinWeight(parseFloat(e.target.value))} min="0" step="0.01" />
+              {newCoinWeightUnit === "Ounces" ? (
+                <Select value={selectedCoinOunceOption} onValueChange={handleCoinOunceOptionChange}>
+                  <SelectTrigger id="coinWeight">
+                    <SelectValue placeholder="Select Ounce Weight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.1">1/10 oz</SelectItem>
+                    <SelectItem value="0.25">1/4 oz</SelectItem>
+                    <SelectItem value="0.5">Half oz</SelectItem>
+                    <SelectItem value="1">1 oz</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input id="coinWeight" type="number" value={newCoinWeight} onChange={(e) => setNewCoinWeight(parseFloat(e.target.value))} min="0" step="0.01" />
+              )}
+              {newCoinWeightUnit === "Ounces" && selectedCoinOunceOption === "custom" && (
+                <Input id="coinWeightCustom" type="number" value={newCoinWeight} onChange={(e) => setNewCoinWeight(parseFloat(e.target.value))} min="0" step="0.01" className="mt-2" placeholder="Enter custom ounces" />
+              )}
             </div>
             <div className="w-1/3">
               <Label htmlFor="coinWeightUnit">Unit</Label>
-              <Select value={newCoinWeightUnit} onValueChange={(value: WeightUnit) => setNewCoinWeightUnit(value)}>
+              <Select value={newCoinWeightUnit} onValueChange={handleCoinWeightUnitChange}>
                 <SelectTrigger id="coinWeightUnit">
                   <SelectValue placeholder="Unit" />
                 </SelectTrigger>
@@ -266,11 +332,29 @@ const PreciousMetalsTracker = () => {
           <div className="flex space-x-2">
             <div className="flex-grow">
               <Label htmlFor="jewelleryWeight">Weight</Label>
-              <Input id="jewelleryWeight" type="number" value={newJewelleryWeight} onChange={(e) => setNewJewelleryWeight(parseFloat(e.target.value))} min="0" step="0.01" />
+              {newJewelleryWeightUnit === "Ounces" ? (
+                <Select value={selectedJewelleryOunceOption} onValueChange={handleJewelleryOunceOptionChange}>
+                  <SelectTrigger id="jewelleryWeight">
+                    <SelectValue placeholder="Select Ounce Weight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.1">1/10 oz</SelectItem>
+                    <SelectItem value="0.25">1/4 oz</SelectItem>
+                    <SelectItem value="0.5">Half oz</SelectItem>
+                    <SelectItem value="1">1 oz</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input id="jewelleryWeight" type="number" value={newJewelleryWeight} onChange={(e) => setNewJewelleryWeight(parseFloat(e.target.value))} min="0" step="0.01" />
+              )}
+              {newJewelleryWeightUnit === "Ounces" && selectedJewelleryOunceOption === "custom" && (
+                <Input id="jewelleryWeightCustom" type="number" value={newJewelleryWeight} onChange={(e) => setNewJewelleryWeight(parseFloat(e.target.value))} min="0" step="0.01" className="mt-2" placeholder="Enter custom ounces" />
+              )}
             </div>
             <div className="w-1/3">
               <Label htmlFor="jewelleryWeightUnit">Unit</Label>
-              <Select value={newJewelleryWeightUnit} onValueChange={(value: WeightUnit) => setNewJewelleryWeightUnit(value)}>
+              <Select value={newJewelleryWeightUnit} onValueChange={handleJewelleryWeightUnitChange}>
                 <SelectTrigger id="jewelleryWeightUnit">
                   <SelectValue placeholder="Unit" />
                 </SelectTrigger>
