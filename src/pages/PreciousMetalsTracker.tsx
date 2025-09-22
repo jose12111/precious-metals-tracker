@@ -1,0 +1,355 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Coin, Jewellery, MetalType, WeightUnit, Currency, HistoricalPriceData } from "@/types";
+import { fetchCurrentMetalPrices, fetchHistoricalMetalPrices } from "@/services/metalPrices";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { v4 as uuidv4 } from 'uuid';
+import { showSuccess, showError } from "@/utils/toast";
+
+const PreciousMetalsTracker = () => {
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [jewellery, setJewellery] = useState<Jewellery[]>([]);
+  const [currentCurrency, setCurrentCurrency] = useState<Currency>("ZAR");
+  const [currentPrices, setCurrentPrices] = useState<{
+    goldPerGramZAR: number;
+    silverPerGramZAR: number;
+    zarToUsdRate: number;
+  } | null>(null);
+  const [historicalPrices, setHistoricalPrices] = useState<HistoricalPriceData[]>([]);
+
+  // Form states for adding coins
+  const [newCoinName, setNewCoinName] = useState("");
+  const [newCoinMetalType, setNewCoinMetalType] = useState<MetalType>("Gold");
+  const [newCoinQuantity, setNewCoinQuantity] = useState(1);
+  const [newCoinWeight, setNewCoinWeight] = useState(0);
+  const [newCoinWeightUnit, setNewCoinWeightUnit] = useState<WeightUnit>("Grams");
+
+  // Form states for adding jewellery
+  const [newJewelleryName, setNewJewelleryName] = useState("");
+  const [newJewelleryMetalType, setNewJewelleryMetalType] = useState<MetalType>("Gold");
+  const [newJewelleryWeight, setNewJewelleryWeight] = useState(0);
+  const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Grams");
+  const [newJewelleryDescription, setNewJewelleryDescription] = useState("");
+
+  useEffect(() => {
+    const loadPrices = async () => {
+      try {
+        const prices = await fetchCurrentMetalPrices();
+        setCurrentPrices(prices);
+        const historical = await fetchHistoricalMetalPrices();
+        setHistoricalPrices(historical);
+      } catch (error) {
+        console.error("Failed to fetch metal prices:", error);
+        showError("Failed to load metal prices.");
+      }
+    };
+    loadPrices();
+  }, []);
+
+  const convertWeightToGrams = (weight: number, unit: WeightUnit) => {
+    return unit === "Ounces" ? weight * 28.35 : weight;
+  };
+
+  const calculateItemValue = (
+    metalType: MetalType,
+    totalWeightInGrams: number,
+    prices: typeof currentPrices,
+    currency: Currency
+  ) => {
+    if (!prices) return 0;
+
+    let valueZAR = 0;
+    if (metalType === "Gold") {
+      valueZAR = totalWeightInGrams * prices.goldPerGramZAR;
+    } else {
+      valueZAR = totalWeightInGrams * prices.silverPerGramZAR;
+    }
+
+    return currency === "USD" ? valueZAR * prices.zarToUsdRate : valueZAR;
+  };
+
+  const totalPortfolioValue = coins.reduce((sum, coin) => {
+    const totalWeightInGrams = convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit);
+    return sum + calculateItemValue(coin.metalType, totalWeightInGrams, currentPrices, currentCurrency);
+  }, 0) + jewellery.reduce((sum, item) => {
+    const totalWeightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
+    return sum + calculateItemValue(item.metalType, totalWeightInGrams, currentPrices, currentCurrency);
+  }, 0);
+
+  const handleAddCoin = () => {
+    if (!newCoinName || newCoinWeight <= 0 || newCoinQuantity <= 0) {
+      showError("Please fill in all coin fields correctly.");
+      return;
+    }
+    const newCoin: Coin = {
+      id: uuidv4(),
+      name: newCoinName,
+      metalType: newCoinMetalType,
+      quantity: newCoinQuantity,
+      weight: newCoinWeight,
+      weightUnit: newCoinWeightUnit,
+    };
+    setCoins([...coins, newCoin]);
+    setNewCoinName("");
+    setNewCoinQuantity(1);
+    setNewCoinWeight(0);
+    showSuccess("Coin added successfully!");
+  };
+
+  const handleAddJewellery = () => {
+    if (!newJewelleryName || newJewelleryWeight <= 0) {
+      showError("Please fill in all jewellery fields correctly.");
+      return;
+    }
+    const newItem: Jewellery = {
+      id: uuidv4(),
+      name: newJewelleryName,
+      metalType: newJewelleryMetalType,
+      weight: newJewelleryWeight,
+      weightUnit: newJewelleryWeightUnit,
+      description: newJewelleryDescription,
+    };
+    setJewellery([...jewellery, newItem]);
+    setNewJewelleryName("");
+    setNewJewelleryWeight(0);
+    setNewJewelleryDescription("");
+    showSuccess("Jewellery added successfully!");
+  };
+
+  const calculateZakah = () => {
+    if (!currentPrices) {
+      showError("Cannot calculate Zakah, metal prices not loaded.");
+      return;
+    }
+
+    const totalCoinValueZAR = coins.reduce((sum, coin) => {
+      const totalWeightInGrams = convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit);
+      return sum + calculateItemValue(coin.metalType, totalWeightInGrams, currentPrices, "ZAR");
+    }, 0);
+
+    const zakahAmountZAR = totalCoinValueZAR * 0.025; // 2.5% of total coin value
+    const zakahAmountUSD = zakahAmountZAR * currentPrices.zarToUsdRate;
+
+    alert(
+      `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}\nUSD: ${zakahAmountUSD.toFixed(2)}`
+    );
+  };
+
+  return (
+    <div className="container mx-auto p-4 space-y-8">
+      <h1 className="text-4xl font-bold text-center mb-8">Precious Metals Tracker</h1>
+
+      {/* Portfolio Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center">
+            Total Portfolio Value
+            <Select value={currentCurrency} onValueChange={(value: Currency) => setCurrentCurrency(value)}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Currency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ZAR">ZAR</SelectItem>
+                <SelectItem value="USD">USD</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-3xl font-semibold">
+            {currentCurrency === "ZAR" ? "R" : "$"}
+            {totalPortfolioValue.toFixed(2)}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Add Coin Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Coin</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="coinName">Coin Name</Label>
+            <Input id="coinName" value={newCoinName} onChange={(e) => setNewCoinName(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="coinMetalType">Metal Type</Label>
+            <Select value={newCoinMetalType} onValueChange={(value: MetalType) => setNewCoinMetalType(value)}>
+              <SelectTrigger id="coinMetalType">
+                <SelectValue placeholder="Select Metal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Gold">Gold</SelectItem>
+                <SelectItem value="Silver">Silver</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="coinQuantity">Quantity</Label>
+            <Input id="coinQuantity" type="number" value={newCoinQuantity} onChange={(e) => setNewCoinQuantity(parseInt(e.target.value))} min="1" />
+          </div>
+          <div className="flex space-x-2">
+            <div className="flex-grow">
+              <Label htmlFor="coinWeight">Weight</Label>
+              <Input id="coinWeight" type="number" value={newCoinWeight} onChange={(e) => setNewCoinWeight(parseFloat(e.target.value))} min="0" step="0.01" />
+            </div>
+            <div className="w-1/3">
+              <Label htmlFor="coinWeightUnit">Unit</Label>
+              <Select value={newCoinWeightUnit} onValueChange={(value: WeightUnit) => setNewCoinWeightUnit(value)}>
+                <SelectTrigger id="coinWeightUnit">
+                  <SelectValue placeholder="Unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ounces">Ounces</SelectItem>
+                  <SelectItem value="Grams">Grams</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="md:col-span-2">
+            <Button onClick={handleAddCoin} className="w-full">Add Coin</Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Display Coins */}
+      {coins.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Coins</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {coins.map((coin) => (
+                <li key={coin.id} className="flex justify-between items-center p-2 border rounded-md">
+                  <span>{coin.name} ({coin.metalType}) - {coin.quantity} x {coin.weight} {coin.weightUnit}</span>
+                  <span>
+                    {currentCurrency === "ZAR" ? "R" : "$"}
+                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit), currentPrices, currentCurrency).toFixed(2)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Add Jewellery Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Jewellery</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="jewelleryName">Item Name</Label>
+            <Input id="jewelleryName" value={newJewelleryName} onChange={(e) => setNewJewelleryName(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="jewelleryMetalType">Metal Type</Label>
+            <Select value={newJewelleryMetalType} onValueChange={(value: MetalType) => setNewJewelleryMetalType(value)}>
+              <SelectTrigger id="jewelleryMetalType">
+                <SelectValue placeholder="Select Metal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Gold">Gold</SelectItem>
+                <SelectItem value="Silver">Silver</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex space-x-2">
+            <div className="flex-grow">
+              <Label htmlFor="jewelleryWeight">Weight</Label>
+              <Input id="jewelleryWeight" type="number" value={newJewelleryWeight} onChange={(e) => setNewJewelleryWeight(parseFloat(e.target.value))} min="0" step="0.01" />
+            </div>
+            <div className="w-1/3">
+              <Label htmlFor="jewelleryWeightUnit">Unit</Label>
+              <Select value={newJewelleryWeightUnit} onValueChange={(value: WeightUnit) => setNewJewelleryWeightUnit(value)}>
+                <SelectTrigger id="jewelleryWeightUnit">
+                  <SelectValue placeholder="Unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ounces">Ounces</SelectItem>
+                  <SelectItem value="Grams">Grams</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="jewelleryDescription">Description (Optional)</Label>
+            <Input id="jewelleryDescription" value={newJewelleryDescription} onChange={(e) => setNewJewelleryDescription(e.target.value)} />
+          </div>
+          <div className="md:col-span-2">
+            <Button onClick={handleAddJewellery} className="w-full">Add Jewellery</Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Display Jewellery */}
+      {jewellery.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Jewellery</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {jewellery.map((item) => (
+                <li key={item.id} className="flex justify-between items-center p-2 border rounded-md">
+                  <span>{item.name} ({item.metalType}) - {item.weight} {item.weightUnit} {item.description && `(${item.description})`}</span>
+                  <span>
+                    {currentCurrency === "ZAR" ? "R" : "$"}
+                    {calculateItemValue(item.metalType, convertWeightToGrams(item.weight, item.weightUnit), currentPrices, currentCurrency).toFixed(2)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Historical Prices Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Historical Metal Prices (Last 30 Days)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {historicalPrices.length > 0 ? (
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={historicalPrices}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value: number) => `${currentCurrency === "ZAR" ? "R" : "$"}${value.toFixed(2)}`} />
+                  <Line type="monotone" dataKey="gold" stroke="#FFD700" name="Gold" />
+                  <Line type="monotone" dataKey="silver" stroke="#C0C0C0" name="Silver" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p>Loading historical prices...</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Zakah Calculator */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Zakah Calculator</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">Calculate your Zakah based on the total value of your coins.</p>
+          <Button onClick={calculateZakah} className="w-full">Calculate Zakah (2.5%)</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default PreciousMetalsTracker;
