@@ -39,11 +39,11 @@ const PreciousMetalsTracker = () => {
   // Form states for adding jewellery
   const [newJewelleryName, setNewJewelleryName] = useState("");
   const [newJewelleryMetalType, setNewJewelleryMetalType] = useState<MetalType>("Gold");
-  const [newJewelleryWeight, setNewJewelleryWeight] = useState(1); // Default to 1 ounce
-  const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Ounces"); // Default to Ounces
+  const [newJewelleryWeight, setNewJewelleryWeight] = useState(0); // Default to 0 grams
+  const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Grams"); // Default to Grams
   const [newJewelleryDescription, setNewJewelleryDescription] = useState("");
   const [newJewelleryKarat, setNewJewelleryKarat] = useState<number>(24); // Default to 24K for gold
-  const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("1"); // Default to 1 oz
+  const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("custom"); // Default to custom for grams
 
   useEffect(() => {
     const loadPrices = async () => {
@@ -153,12 +153,12 @@ const PreciousMetalsTracker = () => {
     };
     setJewellery([...jewellery, newItem]);
     setNewJewelleryName("");
-    setNewJewelleryWeight(1); // Reset to 1 ounce
+    setNewJewelleryWeight(0); // Reset to 0 grams
     setNewJewelleryDescription("");
     setNewJewelleryMetalType("Gold");
-    setNewJewelleryWeightUnit("Ounces"); // Reset to Ounces
+    setNewJewelleryWeightUnit("Grams"); // Reset to Grams
     setNewJewelleryKarat(24); // Reset karat to 24K
-    setSelectedJewelleryOunceOption("1"); // Reset to 1 oz
+    setSelectedJewelleryOunceOption("custom"); // Reset to custom for grams
     showSuccess("Jewellery added successfully!");
   };
 
