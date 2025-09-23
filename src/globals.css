@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 60 30% 96%; /* Light cream/off-white */
+    --background: 60 80% 95%; /* Light yellow */
     --foreground: 140 15% 20%; /* Deep forest green for text */
 
     --card: 60 30% 100%; /* White card background */
@@ -45,8 +45,8 @@
   }
 
   .dark {
-    --background: 140 10% 15%; /* Deep dark green */
-    --foreground: 60 30% 90%; /* Light cream/off-white */
+    --background: 60 80% 95%; /* Light yellow for dark mode too */
+    --foreground: 140 10% 15%; /* Deep dark green */
 
     --card: 140 10% 20%; /* Darker green card background */
     --card-foreground: 60 30% 90%;
