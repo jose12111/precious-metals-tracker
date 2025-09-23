@@ -484,7 +484,7 @@ const PreciousMetalsTracker = () => {
 
       {/* Display Jewellery */}
       {jewellery.length > 0 && (
-        <Card>
+        <Card className="bg-accent">
           <CardHeader>
             <CardTitle>Your Jewellery</CardTitle>
           </CardHeader>
