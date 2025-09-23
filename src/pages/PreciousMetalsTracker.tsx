@@ -239,7 +239,7 @@ const PreciousMetalsTracker = () => {
       {/* Portfolio Summary */}
       <Card className="bg-light-green shadow-lg">
         <CardHeader>
-          <CardTitle className="flex justify-between items-center">
+          <CardTitle className="flex justify-between items-center text-foreground">
             Total Portfolio Value
             <Select value={currentCurrency} onValueChange={(value: Currency) => setCurrentCurrency(value)}>
               <SelectTrigger className="w-[100px]">
@@ -253,7 +253,7 @@ const PreciousMetalsTracker = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-semibold">
+          <p className="text-3xl font-semibold text-foreground">
             {currentCurrency === "ZAR" ? "R" : "$"}
             {totalPortfolioValue.toFixed(2)}
           </p>
