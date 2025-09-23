@@ -530,7 +530,7 @@ const PreciousMetalsTracker = () => {
       </Card>
 
       {/* Zakah Calculator */}
-      <Card>
+      <Card className="bg-medium-green">
         <CardHeader>
           <CardTitle>Zakah Calculator</CardTitle>
         </CardHeader>

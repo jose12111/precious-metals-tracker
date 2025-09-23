@@ -47,6 +47,7 @@
     --light-green: 140 60% 90%; /* Pastel green */
     --light-blue: 200 60% 90%; /* Sky blue */
     --nice-pink: 340 80% 85%; /* Richer, darker pink */
+    --medium-green: 140 40% 70%; /* Medium green */
   }
 
   .dark {
@@ -91,6 +92,7 @@
     --light-green: 140 60% 90%;
     --light-blue: 200 60% 90%;
     --nice-pink: 340 80% 85%;
+    --medium-green: 140 40% 70%;
   }
 }
 
@@ -102,4 +104,3 @@
   body {
     @apply bg-background text-foreground;
   }
-}
