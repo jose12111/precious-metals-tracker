@@ -237,7 +237,7 @@ const PreciousMetalsTracker = () => {
       <h1 className="text-4xl font-bold text-center mb-8">Precious Metals Tracker</h1>
 
       {/* Portfolio Summary */}
-      <Card className="bg-light-green shadow-md">
+      <Card className="bg-light-green shadow-lg">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             Total Portfolio Value
@@ -261,7 +261,7 @@ const PreciousMetalsTracker = () => {
       </Card>
 
       {/* Manual Price Input Section */}
-      <Card className="bg-light-blue shadow-md">
+      <Card className="bg-light-blue shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Manual Price Input
@@ -304,7 +304,7 @@ const PreciousMetalsTracker = () => {
       </Card>
 
       {/* Add Coin Section */}
-      <Card className="shadow-md">
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Add New Coin</CardTitle>
         </CardHeader>
@@ -373,7 +373,7 @@ const PreciousMetalsTracker = () => {
 
       {/* Display Coins */}
       {coins.length > 0 && (
-        <Card className="shadow-md">
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Your Coins</CardTitle>
           </CardHeader>
@@ -394,7 +394,7 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Add Jewellery Section */}
-      <Card className="bg-nice-pink shadow-md">
+      <Card className="bg-nice-pink shadow-lg">
         <CardHeader>
           <CardTitle>Add New Jewellery</CardTitle>
         </CardHeader>
@@ -484,7 +484,7 @@ const PreciousMetalsTracker = () => {
 
       {/* Display Jewellery */}
       {jewellery.length > 0 && (
-        <Card className="bg-accent shadow-md">
+        <Card className="bg-accent shadow-lg">
           <CardHeader>
             <CardTitle>Your Jewellery</CardTitle>
           </CardHeader>
@@ -507,7 +507,7 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Zakah Calculator */}
-      <Card className="bg-medium-green shadow-md">
+      <Card className="bg-medium-green shadow-lg">
         <CardHeader>
           <CardTitle>Zakah Calculator</CardTitle>
         </CardHeader>
