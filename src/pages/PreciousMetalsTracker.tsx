@@ -380,7 +380,7 @@ const PreciousMetalsTracker = () => {
                   <span>{coin.name} ({coin.metalType}) - {coin.quantity} x {coin.weight} {coin.weightUnit}</span>
                   <span>
                     {currentCurrency === "ZAR" ? "R" : "$"}
-                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, currentCurrency === "ZAR" ? "Grams" : "Ounces"), currentCurrency).toFixed(2)}
+                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit), currentCurrency).toFixed(2)}
                   </span>
                 </li>
               ))}
@@ -501,8 +501,6 @@ const PreciousMetalsTracker = () => {
           </CardContent>
         </Card>
       )}
-
-      {/* Removed Historical Prices Chart */}
 
       {/* Zakah Calculator */}
       <Card className="bg-medium-green">
