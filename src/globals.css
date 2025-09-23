@@ -94,9 +94,7 @@
     --nice-pink: 340 80% 85%;
     --medium-green: 140 40% 70%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -104,3 +102,4 @@
   body {
     @apply bg-background text-foreground;
   }
+}
