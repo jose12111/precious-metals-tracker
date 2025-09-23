@@ -62,6 +62,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // New custom colors
+        "light-green": "hsl(var(--light-green))",
+        "light-blue": "hsl(var(--light-blue))",
+        "nice-pink": "hsl(var(--nice-pink))",
       },
       borderRadius: {
         lg: "var(--radius)",

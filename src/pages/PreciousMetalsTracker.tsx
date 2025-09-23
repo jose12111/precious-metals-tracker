@@ -235,7 +235,7 @@ const PreciousMetalsTracker = () => {
       <h1 className="text-4xl font-bold text-center mb-8">Precious Metals Tracker</h1>
 
       {/* Portfolio Summary */}
-      <Card>
+      <Card className="bg-light-green">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             Total Portfolio Value
@@ -259,7 +259,7 @@ const PreciousMetalsTracker = () => {
       </Card>
 
       {/* Manual Price Input Section */}
-      <Card>
+      <Card className="bg-light-blue">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Manual Price Input
@@ -392,7 +392,7 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Add Jewellery Section */}
-      <Card>
+      <Card className="bg-nice-pink">
         <CardHeader>
           <CardTitle>Add New Jewellery</CardTitle>
         </CardHeader>

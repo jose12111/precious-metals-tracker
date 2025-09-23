@@ -42,6 +42,11 @@
     --sidebar-accent-foreground: 60 30% 96%;
     --sidebar-border: 140 10% 35%;
     --sidebar-ring: 40 70% 60%;
+
+    /* New custom colors */
+    --light-green: 140 60% 90%; /* Pastel green */
+    --light-blue: 200 60% 90%; /* Sky blue */
+    --nice-pink: 340 80% 95%; /* Soft, warm pink */
   }
 
   .dark {
@@ -81,6 +86,11 @@
     --sidebar-accent-foreground: 60 30% 90%;
     --sidebar-border: 140 5% 25%;
     --sidebar-ring: 40 70% 60%;
+
+    /* New custom colors for dark mode (can be adjusted if needed) */
+    --light-green: 140 60% 90%;
+    --light-blue: 200 60% 90%;
+    --nice-pink: 340 80% 95%;
   }
 }
 
