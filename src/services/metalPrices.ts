@@ -28,37 +28,36 @@ export const fetchCurrentMetalPrices = async () => {
 };
 
 export const fetchHistoricalMetalPrices = async (): Promise<HistoricalPriceData[]> => {
-  // This function will continue to use mock data for historical prices.
   await new Promise((resolve) => setTimeout(resolve, 700));
 
   const historicalData: HistoricalPriceData[] = [];
   const today = new Date();
 
-  // Get a baseline from the current mock prices for the most recent day
+  // Fetch current prices to use as the starting point for today's historical data
   const currentMockPrices = await fetchCurrentMetalPrices();
-  let currentGoldPrice = currentMockPrices.goldPerGramZAR;
-  let currentSilverPrice = currentMockPrices.silverPerGramZAR;
+  let goldPriceForDay = currentMockPrices.goldPerGramZAR;
+  let silverPriceForDay = currentMockPrices.silverPerGramZAR;
 
-  // Generate prices for the last 30 days, working backwards
-  for (let i = 0; i <= 30; i++) { // Loop from 0 (today) to 30 (30 days ago)
+  // Generate prices for the last 30 days, working backwards from today
+  for (let i = 0; i <= 30; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
     const dateString = date.toISOString().split("T")[0];
 
-    // Introduce small, cumulative fluctuations to simulate a trend
-    // The fluctuations are a percentage of the current price to keep them relative
-    const goldFluctuation = (Math.random() - 0.5) * 0.005 * currentGoldPrice; // +/- 0.25% daily change
-    const silverFluctuation = (Math.random() - 0.5) * 0.007 * currentSilverPrice; // +/- 0.35% daily change
-
-    // Apply fluctuation and ensure prices don't go negative (though unlikely with these small changes)
-    currentGoldPrice = Math.max(0.1, currentGoldPrice + goldFluctuation);
-    currentSilverPrice = Math.max(0.1, currentSilverPrice + silverFluctuation);
-
-    historicalData.unshift({ // Add to the beginning of the array to keep dates in ascending order
+    // Add the current day's price to the historical data
+    historicalData.unshift({
       date: dateString,
-      gold: parseFloat(currentGoldPrice.toFixed(2)),
-      silver: parseFloat(currentSilverPrice.toFixed(2)),
+      gold: parseFloat(goldPriceForDay.toFixed(2)),
+      silver: parseFloat(silverPriceForDay.toFixed(2)),
     });
+
+    // Apply small, inverse fluctuations for the previous day's price
+    // This simulates a trend going backward in time
+    const goldFluctuation = (Math.random() - 0.5) * 0.005 * goldPriceForDay; // +/- 0.25% daily change
+    const silverFluctuation = (Math.random() - 0.5) * 0.007 * silverPriceForDay; // +/- 0.35% daily change
+
+    goldPriceForDay = Math.max(0.1, goldPriceForDay - goldFluctuation); // Subtract fluctuation to go backward
+    silverPriceForDay = Math.max(0.1, silverPriceForDay - silverFluctuation); // Subtract fluctuation to go backward
   }
   return historicalData;
 };
