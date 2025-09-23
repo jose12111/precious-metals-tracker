@@ -18,6 +18,7 @@ export interface Jewellery {
   weight: number; // Total weight
   weightUnit: WeightUnit;
   description?: string; // Optional description for the item
+  karat?: number; // Optional: for gold jewellery (e.g., 24, 22, 18, 9)
 }
 
 export interface HistoricalPriceData {

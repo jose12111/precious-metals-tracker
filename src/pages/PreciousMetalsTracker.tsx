@@ -43,6 +43,7 @@ const PreciousMetalsTracker = () => {
   const [newJewelleryWeight, setNewJewelleryWeight] = useState(1); // Default to 1 ounce
   const [newJewelleryWeightUnit, setNewJewelleryWeightUnit] = useState<WeightUnit>("Ounces"); // Default to Ounces
   const [newJewelleryDescription, setNewJewelleryDescription] = useState("");
+  const [newJewelleryKarat, setNewJewelleryKarat] = useState<number>(24); // Default to 24K for gold
   const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("1"); // Default to 1 oz
 
   useEffect(() => {
@@ -76,14 +77,32 @@ const PreciousMetalsTracker = () => {
     return metalType === "Gold" ? currentPrices?.goldPerGramZAR || 0 : currentPrices?.silverPerGramZAR || 0;
   };
 
+  // Helper to get karat purity factor
+  const getKaratPurityFactor = (karat: number) => {
+    switch (karat) {
+      case 24: return 1.0;
+      case 22: return 22 / 24;
+      case 18: return 18 / 24;
+      case 9: return 9 / 24;
+      default: return 1.0; // Default to 24K if unknown
+    }
+  };
+
   const calculateItemValue = (
     metalType: MetalType,
     totalWeightInGrams: number,
-    currency: Currency
+    currency: Currency,
+    karat?: number // Added karat as an optional parameter
   ) => {
-    if (!currentPrices && !useManualPrices) return 0; // If no prices and not manual mode, return 0
+    if (!currentPrices && !useManualPrices) return 0;
 
-    const pricePerGramZAR = getEffectiveMetalPricePerGramZAR(metalType);
+    let pricePerGramZAR = getEffectiveMetalPricePerGramZAR(metalType);
+
+    // Adjust gold price based on karat purity
+    if (metalType === "Gold" && karat) {
+      pricePerGramZAR *= getKaratPurityFactor(karat);
+    }
+
     const valueZAR = totalWeightInGrams * pricePerGramZAR;
 
     return currency === "USD" && currentPrices ? valueZAR * currentPrices.zarToUsdRate : valueZAR;
@@ -94,7 +113,7 @@ const PreciousMetalsTracker = () => {
     return sum + calculateItemValue(coin.metalType, totalWeightInGrams, currentCurrency);
   }, 0) + jewellery.reduce((sum, item) => {
     const totalWeightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
-    return sum + calculateItemValue(item.metalType, totalWeightInGrams, currentCurrency);
+    return sum + calculateItemValue(item.metalType, totalWeightInGrams, currentCurrency, item.karat);
   }, 0);
 
   const handleAddCoin = () => {
@@ -132,6 +151,7 @@ const PreciousMetalsTracker = () => {
       weight: newJewelleryWeight,
       weightUnit: newJewelleryWeightUnit,
       description: newJewelleryDescription,
+      karat: newJewelleryMetalType === "Gold" ? newJewelleryKarat : undefined, // Only add karat if metal is Gold
     };
     setJewellery([...jewellery, newItem]);
     setNewJewelleryName("");
@@ -139,6 +159,7 @@ const PreciousMetalsTracker = () => {
     setNewJewelleryDescription("");
     setNewJewelleryMetalType("Gold");
     setNewJewelleryWeightUnit("Ounces"); // Reset to Ounces
+    setNewJewelleryKarat(24); // Reset karat to 24K
     setSelectedJewelleryOunceOption("1"); // Reset to 1 oz
     showSuccess("Jewellery added successfully!");
   };
@@ -156,7 +177,7 @@ const PreciousMetalsTracker = () => {
 
     const totalJewelleryValueZAR = jewellery.reduce((sum, item) => {
       const totalWeightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
-      return sum + calculateItemValue(item.metalType, totalWeightInGrams, "ZAR");
+      return sum + calculateItemValue(item.metalType, totalWeightInGrams, "ZAR", item.karat);
     }, 0);
 
     const totalPreciousMetalValueZAR = totalCoinValueZAR + totalJewelleryValueZAR;
@@ -382,7 +403,12 @@ const PreciousMetalsTracker = () => {
           </div>
           <div>
             <Label htmlFor="jewelleryMetalType">Metal Type</Label>
-            <Select value={newJewelleryMetalType} onValueChange={(value: MetalType) => setNewJewelleryMetalType(value)}>
+            <Select value={newJewelleryMetalType} onValueChange={(value: MetalType) => {
+              setNewJewelleryMetalType(value);
+              if (value === "Silver") {
+                setNewJewelleryKarat(24); // Reset karat if switching to silver
+              }
+            }}>
               <SelectTrigger id="jewelleryMetalType">
                 <SelectValue placeholder="Select Metal" />
               </SelectTrigger>
@@ -392,6 +418,22 @@ const PreciousMetalsTracker = () => {
               </SelectContent>
             </Select>
           </div>
+          {newJewelleryMetalType === "Gold" && (
+            <div>
+              <Label htmlFor="jewelleryKarat">Karat</Label>
+              <Select value={String(newJewelleryKarat)} onValueChange={(value) => setNewJewelleryKarat(parseInt(value))}>
+                <SelectTrigger id="jewelleryKarat">
+                  <SelectValue placeholder="Select Karat" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24">24K</SelectItem>
+                  <SelectItem value="22">22K</SelectItem>
+                  <SelectItem value="18">18K</SelectItem>
+                  <SelectItem value="9">9K</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex space-x-2">
             <div className="flex-grow">
               <Label htmlFor="jewelleryWeight">Weight</Label>
@@ -448,10 +490,12 @@ const PreciousMetalsTracker = () => {
             <ul className="space-y-2">
               {jewellery.map((item) => (
                 <li key={item.id} className="flex justify-between items-center p-2 border rounded-md">
-                  <span>{item.name} ({item.metalType}) - {item.weight} {item.weightUnit} {item.description && `(${item.description})`}</span>
+                  <span>
+                    {item.name} ({item.metalType} {item.karat ? `(${item.karat}K)` : ''}) - {item.weight} {item.weightUnit} {item.description && `(${item.description})`}
+                  </span>
                   <span>
                     {currentCurrency === "ZAR" ? "R" : "$"}
-                    {calculateItemValue(item.metalType, convertWeightToGrams(item.weight, item.weightUnit), currentCurrency).toFixed(2)}
+                    {calculateItemValue(item.metalType, convertWeightToGrams(item.weight, item.weightUnit), currentCurrency, item.karat).toFixed(2)}
                   </span>
                 </li>
               ))}
