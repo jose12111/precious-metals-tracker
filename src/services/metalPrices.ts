@@ -2,7 +2,7 @@ import { HistoricalPriceData } from "@/types";
 
 // IMPORTANT: Replace "YOUR_SUPABASE_FUNCTION_URL_HERE" with the actual URL
 // you get after deploying your Supabase function.
-const SUPABASE_METAL_PRICES_FUNCTION_URL = "YOUR_SUPABASE_FUNCTION_URL_HERE";
+const SUPABASE_METAL_PRICES_FUNCTION_URL = "https://ocghcuhmytdlnwxmkbhy.supabase.co/functions/v1/fetch-metal-prices"; // <--- UPDATE THIS LINE WITH YOUR ACTUAL DEPLOYED URL
 
 export const fetchCurrentMetalPrices = async () => {
   try {
