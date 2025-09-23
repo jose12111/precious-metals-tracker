@@ -1,48 +1,30 @@
 import { HistoricalPriceData } from "@/types";
 
-// IMPORTANT: Replace "YOUR_SUPABASE_FUNCTION_URL_HERE" with the actual URL
-// you get after deploying your Supabase function.
-const SUPABASE_METAL_PRICES_FUNCTION_URL = "https://ocghcuhmytdlnwxmkbhy.supabase.co/functions/v1/fetch-metal-prices"; // <--- UPDATE THIS LINE WITH YOUR ACTUAL DEPLOYED URL
+// We are removing the dependency on the Supabase Edge Function for simplicity.
+// All price data will now be generated as mock data directly within the application.
 
 export const fetchCurrentMetalPrices = async () => {
-  try {
-    const response = await fetch(SUPABASE_METAL_PRICES_FUNCTION_URL, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        // If your Supabase function requires authentication, you might add an Authorization header here:
-        // 'Authorization': `Bearer ${YOUR_CLIENT_SIDE_AUTH_TOKEN}`
-      },
-    });
+  // Simulate an API call delay
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to fetch live metal prices from Supabase function.");
-    }
+  const OUNCE_TO_GRAMS = 28.35;
+  const BASE_GOLD_PRICE_PER_OUNCE_ZAR = 64424;
+  const BASE_SILVER_PRICE_PER_GRAM_ZAR = 28;
+  const MOCK_ZAR_TO_USD_RATE = 0.055;
 
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching live metal prices from Supabase function:", error);
-    // Fallback to mock data if the Supabase function call fails
-    const OUNCE_TO_GRAMS = 28.35;
-    const BASE_GOLD_PRICE_PER_OUNCE_ZAR = 64424;
-    const BASE_SILVER_PRICE_PER_GRAM_ZAR = 28;
-    const MOCK_ZAR_TO_USD_RATE = 0.055;
+  // Introduce a small random fluctuation for "live" effect
+  const goldFluctuation = (Math.random() - 0.5) * 0.03; // +/- 1.5%
+  const silverFluctuation = (Math.random() - 0.5) * 0.04; // +/- 2%
 
-    const goldFluctuation = (Math.random() - 0.5) * 0.02; // +/- 1%
-    const silverFluctuation = (Math.random() - 0.5) * 0.03; // +/- 1.5%
+  const goldPricePerOunceZAR = BASE_GOLD_PRICE_PER_OUNCE_ZAR * (1 + goldFluctuation);
+  const goldPerGramZAR = goldPricePerOunceZAR / OUNCE_TO_GRAMS;
+  const silverPerGramZAR = BASE_SILVER_PRICE_PER_GRAM_ZAR * (1 + silverFluctuation);
 
-    const goldPricePerOunceZAR = BASE_GOLD_PRICE_PER_OUNCE_ZAR * (1 + goldFluctuation);
-    const goldPerGramZAR = goldPricePerOunceZAR / OUNCE_TO_GRAMS;
-    const silverPerGramZAR = BASE_SILVER_PRICE_PER_GRAM_ZAR * (1 + silverFluctuation);
-
-    return {
-      goldPerGramZAR: parseFloat(goldPerGramZAR.toFixed(2)),
-      silverPerGramZAR: parseFloat(silverPerGramZAR.toFixed(2)),
-      zarToUsdRate: MOCK_ZAR_TO_USD_RATE,
-    };
-  }
+  return {
+    goldPerGramZAR: parseFloat(goldPerGramZAR.toFixed(2)),
+    silverPerGramZAR: parseFloat(silverPerGramZAR.toFixed(2)),
+    zarToUsdRate: MOCK_ZAR_TO_USD_RATE,
+  };
 };
 
 export const fetchHistoricalMetalPrices = async (): Promise<HistoricalPriceData[]> => {
