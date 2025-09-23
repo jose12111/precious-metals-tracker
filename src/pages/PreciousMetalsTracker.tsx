@@ -234,7 +234,7 @@ const PreciousMetalsTracker = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-8">
-      <h1 className="text-4xl font-bold text-center mb-8">Precious Metals Tracker</h1>
+      <h1 className="text-4xl font-bold text-center mb-8 text-accent">Precious Metals Tracker</h1>
 
       {/* Portfolio Summary */}
       <Card className="bg-light-green shadow-lg">
