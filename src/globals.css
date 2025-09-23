@@ -48,6 +48,9 @@
     --light-blue: 200 60% 90%; /* Sky blue */
     --nice-pink: 340 80% 85%; /* Richer, darker pink */
     --medium-green: 140 40% 70%; /* Medium green */
+
+    /* Custom text shadow */
+    --text-shadow-color: 140 15% 10%; /* A darker shade of foreground for shadow */
   }
 
   .dark {
@@ -93,6 +96,9 @@
     --light-blue: 200 60% 90%;
     --nice-pink: 340 80% 85%;
     --medium-green: 140 40% 70%;
+
+    /* Custom text shadow for dark mode */
+    --text-shadow-color: 140 10% 5%; /* Even darker shade for shadow */
   }
 
   * {
@@ -101,5 +107,11 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px hsl(var(--text-shadow-color));
   }
 }
