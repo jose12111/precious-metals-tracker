@@ -21,7 +21,6 @@ const PreciousMetalsTracker = () => {
     silverPerGramZAR: number;
     zarToUsdRate: number;
   } | null>(null);
-  // Removed historicalPrices state
 
   // New states for manual price input
   const [useManualPrices, setUseManualPrices] = useState(false);
@@ -53,8 +52,6 @@ const PreciousMetalsTracker = () => {
         // Pre-fill manual prices with fetched prices
         setManualGoldPricePerGramZAR(prices.goldPerGramZAR);
         setManualSilverPricePerGramZAR(prices.silverPerGramZAR);
-
-        // Removed historical price fetching
       } catch (error) {
         console.error("Failed to fetch metal prices:", error);
         showError("Failed to load metal prices.");
@@ -63,16 +60,22 @@ const PreciousMetalsTracker = () => {
     loadPrices();
   }, []);
 
+  // Derived effective prices based on manual input toggle
+  const effectiveGoldPricePerGramZAR = useManualPrices
+    ? manualGoldPricePerGramZAR
+    : currentPrices?.goldPerGramZAR || 0;
+
+  const effectiveSilverPricePerGramZAR = useManualPrices
+    ? manualSilverPricePerGramZAR
+    : currentPrices?.silverPerGramZAR || 0;
+
   const convertWeightToGrams = (weight: number, unit: WeightUnit) => {
     return unit === "Ounces" ? weight * 28.35 : weight;
   };
 
-  // Helper to get the effective price per gram based on manual input toggle
+  // Helper to get the effective price per gram based on metal type
   const getEffectiveMetalPricePerGramZAR = (metalType: MetalType) => {
-    if (useManualPrices) {
-      return metalType === "Gold" ? manualGoldPricePerGramZAR : manualSilverPricePerGramZAR;
-    }
-    return metalType === "Gold" ? currentPrices?.goldPerGramZAR || 0 : currentPrices?.silverPerGramZAR || 0;
+    return metalType === "Gold" ? effectiveGoldPricePerGramZAR : effectiveSilverPricePerGramZAR;
   };
 
   // Helper to get karat purity factor
@@ -92,7 +95,8 @@ const PreciousMetalsTracker = () => {
     currency: Currency,
     karat?: number // Added karat as an optional parameter
   ) => {
-    if (!currentPrices && !useManualPrices) return 0;
+    // If no prices are available (neither current nor manual), return 0
+    if (effectiveGoldPricePerGramZAR === 0 && effectiveSilverPricePerGramZAR === 0) return 0;
 
     let pricePerGramZAR = getEffectiveMetalPricePerGramZAR(metalType);
 
@@ -163,7 +167,8 @@ const PreciousMetalsTracker = () => {
   };
 
   const calculateZakah = () => {
-    if (!currentPrices && !useManualPrices) {
+    // Check if any effective prices are available
+    if (effectiveGoldPricePerGramZAR === 0 && effectiveSilverPricePerGramZAR === 0) {
       showError("Cannot calculate Zakah, metal prices not loaded or manually entered.");
       return;
     }
@@ -181,10 +186,9 @@ const PreciousMetalsTracker = () => {
     const totalPreciousMetalValueZAR = totalCoinValueZAR + totalJewelleryValueZAR;
 
     const zakahAmountZAR = totalPreciousMetalValueZAR * 0.025; // 2.5% of total precious metal value
-    const zakahAmountUSD = zakahAmountZAR * (currentPrices?.zarToUsdRate || 0);
 
     showSuccess(
-      `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}\nUSD: ${zakahAmountUSD.toFixed(2)}`
+      `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}`
     );
   };
 
