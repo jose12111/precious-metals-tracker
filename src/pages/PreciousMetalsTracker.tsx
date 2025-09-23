@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Coin, Jewellery, MetalType, WeightUnit, Currency, HistoricalPriceData } from "@/types";
-import { fetchCurrentMetalPrices, fetchHistoricalMetalPrices } from "@/services/metalPrices";
+import { Coin, Jewellery, MetalType, WeightUnit, Currency } from "@/types";
+import { fetchCurrentMetalPrices } from "@/services/metalPrices";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { v4 as uuidv4 } from 'uuid';
 import { showSuccess, showError } from "@/utils/toast";
 import { Switch } from "@/components/ui/switch"; // Import Switch component
@@ -22,7 +21,7 @@ const PreciousMetalsTracker = () => {
     silverPerGramZAR: number;
     zarToUsdRate: number;
   } | null>(null);
-  const [historicalPrices, setHistoricalPrices] = useState<HistoricalPriceData[]>([]);
+  // Removed historicalPrices state
 
   // New states for manual price input
   const [useManualPrices, setUseManualPrices] = useState(false);
@@ -55,8 +54,7 @@ const PreciousMetalsTracker = () => {
         setManualGoldPricePerGramZAR(prices.goldPerGramZAR);
         setManualSilverPricePerGramZAR(prices.silverPerGramZAR);
 
-        const historical = await fetchHistoricalMetalPrices();
-        setHistoricalPrices(historical);
+        // Removed historical price fetching
       } catch (error) {
         console.error("Failed to fetch metal prices:", error);
         showError("Failed to load metal prices.");
@@ -382,7 +380,7 @@ const PreciousMetalsTracker = () => {
                   <span>{coin.name} ({coin.metalType}) - {coin.quantity} x {coin.weight} {coin.weightUnit}</span>
                   <span>
                     {currentCurrency === "ZAR" ? "R" : "$"}
-                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit), currentCurrency).toFixed(2)}
+                    {calculateItemValue(coin.metalType, convertWeightToGrams(coin.weight * coin.quantity, currentCurrency === "ZAR" ? "Grams" : "Ounces"), currentCurrency).toFixed(2)}
                   </span>
                 </li>
               ))}
@@ -504,30 +502,7 @@ const PreciousMetalsTracker = () => {
         </Card>
       )}
 
-      {/* Historical Prices Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Historical Metal Prices (Last 30 Days)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {historicalPrices.length > 0 ? (
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={historicalPrices}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value: number) => `${currentCurrency === "ZAR" ? "R" : "$"}${value.toFixed(2)}`} />
-                  <Line type="monotone" dataKey="gold" stroke="#FFD700" name="Gold" />
-                  <Line type="monotone" dataKey="silver" stroke="#C0C0C0" name="Silver" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p>Loading historical prices...</p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Removed Historical Prices Chart */}
 
       {/* Zakah Calculator */}
       <Card className="bg-medium-green">
