@@ -291,8 +291,8 @@ const PreciousMetalsTracker = () => {
       {/* Manual Price Input Section */}
       <Card className="bg-light-blue shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between text-shadow">
-            Manual Price Input
+          <CardTitle className="flex items-center justify-between">
+            <span className="text-shadow">Manual Price Input</span>
             <div className="flex items-center space-x-2">
               <Label htmlFor="manual-prices-toggle">Enable Manual Input</Label>
               <Switch
