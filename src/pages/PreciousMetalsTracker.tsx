@@ -267,7 +267,7 @@ const PreciousMetalsTracker = () => {
       {/* Portfolio Summary */}
       <Card className="bg-light-green shadow-lg">
         <CardHeader>
-          <CardTitle className="flex justify-between items-center text-foreground">
+          <CardTitle className="flex justify-between items-center text-foreground text-shadow">
             Total Portfolio Value
             <Select value={currentCurrency} onValueChange={(value: Currency) => setCurrentCurrency(value)}>
               <SelectTrigger className="w-[100px]">
@@ -291,7 +291,7 @@ const PreciousMetalsTracker = () => {
       {/* Manual Price Input Section */}
       <Card className="bg-light-blue shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between text-shadow">
             Manual Price Input
             <div className="flex items-center space-x-2">
               <Label htmlFor="manual-prices-toggle">Enable Manual Input</Label>
@@ -334,7 +334,7 @@ const PreciousMetalsTracker = () => {
       {/* Add Coin Section */}
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Add New Coin</CardTitle>
+          <CardTitle className="text-shadow">Add New Coin</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -403,7 +403,7 @@ const PreciousMetalsTracker = () => {
       {coins.length > 0 && (
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Your Coins</CardTitle>
+            <CardTitle className="text-shadow">Your Coins</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -424,7 +424,7 @@ const PreciousMetalsTracker = () => {
       {/* Add Jewellery Section */}
       <Card className="bg-accent shadow-lg">
         <CardHeader>
-          <CardTitle>Add New Jewellery</CardTitle>
+          <CardTitle className="text-shadow">Add New Jewellery</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -514,7 +514,7 @@ const PreciousMetalsTracker = () => {
       {jewellery.length > 0 && (
         <Card className="bg-accent shadow-lg">
           <CardHeader>
-            <CardTitle>Your Jewellery</CardTitle>
+            <CardTitle className="text-shadow">Your Jewellery</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -537,7 +537,7 @@ const PreciousMetalsTracker = () => {
       {/* Zakah Calculator */}
       <Card className="bg-medium-green shadow-lg">
         <CardHeader>
-          <CardTitle>Zakah Calculator</CardTitle>
+          <CardTitle className="text-shadow">Zakah Calculator</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-4">Calculate your Zakah based on the total value of your precious metals (coins and jewellery).</p>
