@@ -422,7 +422,7 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Add Jewellery Section */}
-      <Card className="bg-nice-pink shadow-lg">
+      <Card className="bg-accent shadow-lg">
         <CardHeader>
           <CardTitle>Add New Jewellery</CardTitle>
         </CardHeader>
