@@ -13,8 +13,22 @@ import { showSuccess, showError } from "@/utils/toast";
 import { Switch } from "@/components/ui/switch"; // Import Switch component
 
 const PreciousMetalsTracker = () => {
-  const [coins, setCoins] = useState<Coin[]>([]);
-  const [jewellery, setJewellery] = useState<Jewellery[]>([]);
+  // Initialize state from localStorage or empty array
+  const [coins, setCoins] = useState<Coin[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedCoins = localStorage.getItem("preciousMetalsCoins");
+      return savedCoins ? JSON.parse(savedCoins) : [];
+    }
+    return [];
+  });
+  const [jewellery, setJewellery] = useState<Jewellery[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedJewellery = localStorage.getItem("preciousMetalsJewellery");
+      return savedJewellery ? JSON.parse(savedJewellery) : [];
+    }
+    return [];
+  });
+
   const [currentCurrency, setCurrentCurrency] = useState<Currency>("ZAR");
   const [currentPrices, setCurrentPrices] = useState<{
     goldPerGramZAR: number;
@@ -59,6 +73,20 @@ const PreciousMetalsTracker = () => {
     };
     loadPrices();
   }, []);
+
+  // Effect to save coins to localStorage whenever coins state changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("preciousMetalsCoins", JSON.stringify(coins));
+    }
+  }, [coins]);
+
+  // Effect to save jewellery to localStorage whenever jewellery state changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("preciousMetalsJewellery", JSON.stringify(jewellery));
+    }
+  }, [jewellery]);
 
   // Derived effective prices based on manual input toggle
   const effectiveGoldPricePerGramZAR = useManualPrices
