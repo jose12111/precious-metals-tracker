@@ -19,7 +19,7 @@ const PreciousMetalsTracker = () => {
   const NISAB_GOLD_OUNCES = 2.81; // Troy ounces
   const NISAB_SILVER_GRAMS = 612.36;
   const NISAB_SILVER_OUNCES = 19.687; // Troy ounces
-  const OUNCE_TO_GRAMS = 28.35; // Standard conversion for general use, but troy ounce is 31.1035g
+  const OUNCE_TO_GRAMS = 31.1035; // Updated to Troy ounces (previously 28.35 for standard ounce)
 
   // Initialize state from localStorage or empty array
   const [coins, setCoins] = useState<Coin[]>(() => {
@@ -114,8 +114,7 @@ const PreciousMetalsTracker = () => {
     : currentPrices?.silverPerGramZAR || 0;
 
   const convertWeightToGrams = (weight: number, unit: WeightUnit) => {
-    // Using standard OUNCE_TO_GRAMS for general conversion, assuming "Ounces" refers to avoirdupois for input,
-    // but Nisab is typically based on troy ounces for precious metals.
+    // Using standard OUNCE_TO_GRAMS for general conversion, but troy ounce is 31.1035g
     // For simplicity, we'll use 28.35g for input conversion and clarify Nisab in troy ounces.
     return unit === "Ounces" ? weight * OUNCE_TO_GRAMS : weight;
   };

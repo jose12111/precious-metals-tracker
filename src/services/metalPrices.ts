@@ -7,7 +7,7 @@ export const fetchCurrentMetalPrices = async () => {
   // Simulate an API call delay
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const OUNCE_TO_GRAMS = 28.35;
+  const OUNCE_TO_GRAMS = 31.1035; // Updated to Troy ounces (previously 28.35 for standard ounce)
   const BASE_GOLD_PRICE_PER_OUNCE_ZAR = 64424;
   const BASE_SILVER_PRICE_PER_GRAM_ZAR = 28;
   const MOCK_ZAR_TO_USD_RATE = 0.055;
