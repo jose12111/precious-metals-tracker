@@ -314,7 +314,7 @@ const PreciousMetalsTracker = () => {
       <h1 className="text-4xl font-bold text-center mb-8 text-accent text-shadow">Precious Metals Tracker</h1>
 
       {/* Portfolio Summary */}
-      <Card className="bg-light-green shadow-lg border">
+      <Card className="bg-light-green shadow-lg">
         <CardHeader>
           <CardTitle className="flex justify-between items-center text-foreground text-shadow">
             Total Portfolio Value
@@ -338,7 +338,7 @@ const PreciousMetalsTracker = () => {
       </Card>
 
       {/* Manual Price Input Section */}
-      <Card className="bg-light-blue shadow-lg border">
+      <Card className="bg-light-blue shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="text-shadow">Manual Price Input</span>
@@ -381,7 +381,7 @@ const PreciousMetalsTracker = () => {
       </Card>
 
       {/* Add Coin Section */}
-      <Card className="bg-nice-pink shadow-lg border">
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-shadow">Add New Coin</CardTitle>
         </CardHeader>
@@ -450,7 +450,7 @@ const PreciousMetalsTracker = () => {
 
       {/* Display Coins */}
       {coins.length > 0 && (
-        <Card className="bg-nice-pink shadow-lg border">
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-shadow">Your Coins</CardTitle>
           </CardHeader>
@@ -471,7 +471,7 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Add Jewellery Section */}
-      <Card className="bg-medium-green shadow-lg border">
+      <Card className="bg-accent shadow-lg">
         <CardHeader>
           <CardTitle className="text-shadow">Add New Jewellery</CardTitle>
         </CardHeader>
@@ -573,7 +573,7 @@ const PreciousMetalsTracker = () => {
 
       {/* Display Jewellery */}
       {jewellery.length > 0 && (
-        <Card className="bg-medium-green shadow-lg border">
+        <Card className="bg-accent shadow-lg">
           <CardHeader>
             <CardTitle className="text-shadow">Your Jewellery</CardTitle>
           </CardHeader>
@@ -596,7 +596,7 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Zakah Calculator */}
-      <Card className="bg-medium-green shadow-lg min-h-[250px] border"> {/* Added min-h for bigger card */}
+      <Card className="bg-medium-green shadow-lg min-h-[250px]"> {/* Added min-h for bigger card */}
         <CardHeader>
           <CardTitle className="text-shadow">Zakah Calculator</CardTitle>
         </CardHeader>
