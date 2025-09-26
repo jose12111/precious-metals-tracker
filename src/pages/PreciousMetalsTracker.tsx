@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
 import { showSuccess, showError } from "@/utils/toast";
-import { Switch } from "@/components/ui/switch"; // Import Switch component
+import { Switch } from "@/components/ui/switch";
+import GoldCoinLogo from "@/components/GoldCoinLogo"; // Import the new logo component
 
 const PreciousMetalsTracker = () => {
   // Nisab Thresholds
@@ -311,6 +312,7 @@ const PreciousMetalsTracker = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-8">
+      <GoldCoinLogo /> {/* Added the GoldCoinLogo component here */}
       <h1 className="text-4xl font-bold text-center mb-8 text-accent text-shadow">Precious Metals Tracker</h1>
 
       {/* Portfolio Summary */}
