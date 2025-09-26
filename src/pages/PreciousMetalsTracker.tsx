@@ -478,7 +478,19 @@ const PreciousMetalsTracker = () => {
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="jewelleryName">Item Name</Label>
-            <Input id="jewelleryName" value={newJewelleryName} onChange={(e) => setNewJewelleryName(e.target.value)} />
+            <Select value={newJewelleryName} onValueChange={setNewJewelleryName}>
+              <SelectTrigger id="jewelleryName">
+                <SelectValue placeholder="Select Item" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Necklace">Necklace</SelectItem>
+                <SelectItem value="Ring">Ring</SelectItem>
+                <SelectItem value="Bracelet">Bracelet</SelectItem>
+                <SelectItem value="Bangle">Bangle</SelectItem>
+                <SelectItem value="Earrings">Earrings</SelectItem>
+                <SelectItem value="Anklet">Anklet</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="jewelleryMetalType">Metal Type</Label>
