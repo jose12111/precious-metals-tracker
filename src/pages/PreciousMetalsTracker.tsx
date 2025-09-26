@@ -13,6 +13,13 @@ import { showSuccess, showError } from "@/utils/toast";
 import { Switch } from "@/components/ui/switch"; // Import Switch component
 
 const PreciousMetalsTracker = () => {
+  // Nisab Thresholds
+  const NISAB_GOLD_GRAMS = 87.48;
+  const NISAB_GOLD_OUNCES = 2.81; // Troy ounces
+  const NISAB_SILVER_GRAMS = 612.36;
+  const NISAB_SILVER_OUNCES = 19.687; // Troy ounces
+  const OUNCE_TO_GRAMS = 28.35; // Standard conversion for general use, but troy ounce is 31.1035g
+
   // Initialize state from localStorage or empty array
   const [coins, setCoins] = useState<Coin[]>(() => {
     if (typeof window !== 'undefined') {
@@ -58,6 +65,14 @@ const PreciousMetalsTracker = () => {
   const [newJewelleryKarat, setNewJewelleryKarat] = useState<number>(24); // Default to 24K for gold
   const [selectedJewelleryOunceOption, setSelectedJewelleryOunceOption] = useState<string>("custom"); // Default to custom for grams
 
+  // State for Zakah calculation results
+  const [zakahResult, setZakahResult] = useState<{
+    amountZAR: number;
+    goldHoldingsGrams: number;
+    silverHoldingsGrams: number;
+    message: string;
+  } | null>(null);
+
   useEffect(() => {
     const loadPrices = async () => {
       try {
@@ -98,7 +113,10 @@ const PreciousMetalsTracker = () => {
     : currentPrices?.silverPerGramZAR || 0;
 
   const convertWeightToGrams = (weight: number, unit: WeightUnit) => {
-    return unit === "Ounces" ? weight * 28.35 : weight;
+    // Using standard OUNCE_TO_GRAMS for general conversion, assuming "Ounces" refers to avoirdupois for input,
+    // but Nisab is typically based on troy ounces for precious metals.
+    // For simplicity, we'll use 28.35g for input conversion and clarify Nisab in troy ounces.
+    return unit === "Ounces" ? weight * OUNCE_TO_GRAMS : weight;
   };
 
   // Helper to get the effective price per gram based on metal type
@@ -195,29 +213,60 @@ const PreciousMetalsTracker = () => {
   };
 
   const calculateZakah = () => {
-    // Check if any effective prices are available
     if (effectiveGoldPricePerGramZAR === 0 && effectiveSilverPricePerGramZAR === 0) {
+      setZakahResult({
+        amountZAR: 0,
+        goldHoldingsGrams: 0,
+        silverHoldingsGrams: 0,
+        message: "Cannot calculate Zakah, metal prices not loaded or manually entered.",
+      });
       showError("Cannot calculate Zakah, metal prices not loaded or manually entered.");
       return;
     }
 
-    const totalCoinValueZAR = coins.reduce((sum, coin) => {
-      const totalWeightInGrams = convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit);
-      return sum + calculateItemValue(coin.metalType, totalWeightInGrams, "ZAR");
-    }, 0);
+    let totalGoldHoldingsGrams = 0;
+    let totalSilverHoldingsGrams = 0;
 
-    const totalJewelleryValueZAR = jewellery.reduce((sum, item) => {
-      const totalWeightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
-      return sum + calculateItemValue(item.metalType, totalWeightInGrams, "ZAR", item.karat);
-    }, 0);
+    coins.forEach(coin => {
+      const weightInGrams = convertWeightToGrams(coin.weight * coin.quantity, coin.weightUnit);
+      if (coin.metalType === "Gold") {
+        totalGoldHoldingsGrams += weightInGrams;
+      } else {
+        totalSilverHoldingsGrams += weightInGrams;
+      }
+    });
 
-    const totalPreciousMetalValueZAR = totalCoinValueZAR + totalJewelleryValueZAR;
+    jewellery.forEach(item => {
+      const weightInGrams = convertWeightToGrams(item.weight, item.weightUnit);
+      if (item.metalType === "Gold") {
+        totalGoldHoldingsGrams += weightInGrams * getKaratPurityFactor(item.karat || 24); // Assume 24K if karat not specified for gold
+      } else {
+        totalSilverHoldingsGrams += weightInGrams;
+      }
+    });
 
-    const zakahAmountZAR = totalPreciousMetalValueZAR * 0.025; // 2.5% of total precious metal value
+    const totalPreciousMetalValueZAR =
+      (totalGoldHoldingsGrams * effectiveGoldPricePerGramZAR) +
+      (totalSilverHoldingsGrams * effectiveSilverPricePerGramZAR);
 
-    showSuccess(
-      `Zakah to pay:\nZAR: ${zakahAmountZAR.toFixed(2)}`
-    );
+    let message = "";
+    let zakahAmountZAR = 0;
+
+    if (totalGoldHoldingsGrams >= NISAB_GOLD_GRAMS || totalSilverHoldingsGrams >= NISAB_SILVER_GRAMS) {
+      zakahAmountZAR = totalPreciousMetalValueZAR * 0.025; // 2.5% of total precious metal value
+      message = `Zakah to pay: R${zakahAmountZAR.toFixed(2)}`;
+      showSuccess(message);
+    } else {
+      message = "Your holdings are below the Nisab threshold. No Zakah is due.";
+      showSuccess(message);
+    }
+
+    setZakahResult({
+      amountZAR: zakahAmountZAR,
+      goldHoldingsGrams: totalGoldHoldingsGrams,
+      silverHoldingsGrams: totalSilverHoldingsGrams,
+      message: message,
+    });
   };
 
   const handleCoinWeightUnitChange = (value: WeightUnit) => {
@@ -535,13 +584,27 @@ const PreciousMetalsTracker = () => {
       )}
 
       {/* Zakah Calculator */}
-      <Card className="bg-medium-green shadow-lg">
+      <Card className="bg-medium-green shadow-lg min-h-[250px]"> {/* Added min-h for bigger card */}
         <CardHeader>
           <CardTitle className="text-shadow">Zakah Calculator</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="mb-4">Calculate your Zakah based on the total value of your precious metals (coins and jewellery).</p>
-          <Button onClick={calculateZakah} className="w-full">Calculate Zakah (2.5%)</Button>
+          <div className="mb-4 text-sm">
+            <h3 className="font-semibold mb-1">Nisab Thresholds:</h3>
+            <p><strong>Gold:</strong> {NISAB_GOLD_GRAMS} Grams or {NISAB_GOLD_OUNCES} Troy Oz</p>
+            <p><strong>Silver:</strong> {NISAB_SILVER_GRAMS} Grams or {NISAB_SILVER_OUNCES} Troy Oz</p>
+          </div>
+          <Button onClick={calculateZakah} className="w-full mb-4">Calculate Zakah (2.5%)</Button>
+
+          {zakahResult && (
+            <div className="mt-4 p-3 border rounded-md bg-background text-foreground">
+              <h3 className="font-semibold mb-2">Your Holdings:</h3>
+              <p><strong>Gold Equivalent:</strong> {zakahResult.goldHoldingsGrams.toFixed(2)} Grams</p>
+              <p><strong>Silver Equivalent:</strong> {zakahResult.silverHoldingsGrams.toFixed(2)} Grams</p>
+              <p className="mt-2 font-bold">{zakahResult.message}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
